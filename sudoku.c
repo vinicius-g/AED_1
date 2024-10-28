@@ -1,95 +1,97 @@
 #include <stdio.h>
 
-int verificar_linha_coluna(int, int, int, int[9][3][3]);
+void lerMatriz(int sudoku[9][9]) {
+    int linha, coluna;
 
-int verificar_quadrante(int, int, int[3][3]);
+    for (linha = 0; linha < 9; linha++) {
+        for (coluna = 0; coluna < 9; coluna++) {
+            scanf("%d", &sudoku[linha][coluna]);
+        }
+    }
+}
+
+int verificarQuadrante(int inicioLinha, int inicioColuna, int sudoku[9][9]) {
+    int subSudoku[9] = {0,0,0,0,0,0,0,0,0}, linha, coluna;
+
+    for (linha = 0; linha < 3; linha++) {
+        for (coluna = 0; coluna < 3; coluna++) {
+            if (subSudoku[(sudoku[(inicioLinha + linha)][(inicioColuna + coluna)]) - 1]) {
+                return 0;
+            }
+
+            subSudoku[(sudoku[(inicioLinha + linha)][(inicioColuna + coluna)]) - 1] = 1;
+        }
+    }
+
+    return 1;
+}
+
+int verificarLinha(int linha, int sudoku[9][9]) {
+    int linha_sudoku[9] = {0,0,0,0,0,0,0,0,0}, coluna;
+
+    for (coluna = 0; coluna < 9; coluna++) {
+        if (linha_sudoku[(sudoku[linha][coluna]) - 1]) {
+            return 0;
+        }
+
+        linha_sudoku[(sudoku[linha][coluna]) - 1] = 1;
+    }
+
+    return 1;
+}
+
+int verificarColuna(int coluna, int sudoku[9][9]) {
+    int coluna_sudoku[9] = {0,0,0,0,0,0,0,0,0}, linha;
+
+    for (linha = 0; linha < 9; linha++) {
+        if (coluna_sudoku[(sudoku[linha][coluna]) - 1]) {
+            return 0;
+        }
+
+        coluna_sudoku[(sudoku[linha][coluna]) - 1] = 1;
+    }
+
+    return 1;
+}
+
+int verificarSudoku(int sudoku[9][9]) {
+    int contador, linha, coluna;
+
+    for (contador = 0; contador < 9; contador++) {
+        if (!verificarLinha(contador, sudoku)) {
+            return 0;
+        }
+
+        if (!verificarColuna(contador, sudoku)) {
+            return 0;
+        }
+    }
+
+    for (linha = 0; linha < 9; linha += 3) {
+        for (coluna = 0; coluna < 9; coluna += 3) {
+            if (!verificarQuadrante(linha, coluna, sudoku)) {
+                return 0;
+            }
+        }
+    }
+
+    return 1;
+}
 
 int main() {
-    int sudoku[9][3][3], linha, coluna, quadrante, novo_valor, tamanho_sudoku = 0, valido = 1;
+    int quant_sudoku, contador_instancia, sudoku[9][9];
 
-    for (quadrante = 0; quadrante < 9; quadrante++) {
-        tamanho_sudoku = 0;
+    scanf("%d", &quant_sudoku);
 
-        for (linha = 0; linha < 3; linha++) {
-            for (coluna = 0; coluna < 3; coluna++) {
-                scanf("%d", &novo_valor);
-                valido = verificar_quadrante(novo_valor, tamanho_sudoku, sudoku[quadrante]);
+    for (contador_instancia = 1; contador_instancia <= quant_sudoku; contador_instancia++) {
+        lerMatriz(sudoku);
 
-                if (!valido) {
-                    break;
-                }
+        printf("Instancia %d\n", contador_instancia);
 
-                sudoku[quadrante][linha][coluna] = novo_valor;
-                valido = verificar_linha_coluna(linha, coluna, quadrante, sudoku);
-
-                if (!valido) {
-                    break;
-                }
-
-                tamanho_sudoku++;
-            }
-
-            if (!valido) {
-                break;
-            }
-        }
-
-        if (!valido) {
-            printf("Sudoku invalido!\n");
-            break;
+        if (verificarSudoku(sudoku)) {
+            printf("SIM\n\n");
+        } else {
+            printf("NAO\n\n");
         }
     }
-
-    printf("\n");
-
-    if (valido) {
-        for (linha = 0; linha < 9; linha++) {
-            for (coluna = 0; coluna < 9; coluna++) {
-                printf("%d ", sudoku[(coluna/3) + (linha/3 * 3)][linha - (linha/3 * 3)][coluna - (coluna/3 * 3)]);
-
-                if (coluna == 2 || coluna == 5) {
-                    printf("| ");
-                }
-            }
-
-            printf("\n");
-
-            if (linha == 2 || linha == 5) {
-                printf("------+-------+------\n");
-            }
-        }
-    }
-}
-
-int verificar_linha_coluna(int linha, int coluna, int quadrante, int sudoku[9][3][3]) {
-    int quadrante_linha, quadrante_coluna;
-
-    for (quadrante_linha = quadrante % 3; quadrante_linha > 0; quadrante_linha--) {
-        if (sudoku[quadrante][linha][coluna] == sudoku[quadrante - quadrante_linha][linha][coluna]) {
-            printf("Numeros repetidos na mesma linha!\n");
-            return 0;
-        }
-    }
-
-    for (quadrante_coluna = quadrante / 3; quadrante_coluna > 0; quadrante_coluna--) {
-        if (sudoku[quadrante][linha][coluna] == sudoku[quadrante - (quadrante_coluna * 3)][linha][coluna]) {
-            printf("Numeros repetidos na mesma coluna!\n");
-            return 0;
-        }
-    }
-
-    return 1;
-}
-
-int verificar_quadrante(int novo_valor, int tamanho_sudoku, int quadrante_sudoku[3][3]) {
-    int contador;
-
-    for (contador = 0; contador < tamanho_sudoku; contador++) {
-        if (novo_valor == quadrante_sudoku[contador/3][contador%3]) {
-            printf("Numero repetido no quadrante!\n");
-            return 0;
-        }
-    }
-
-    return 1;
 }
